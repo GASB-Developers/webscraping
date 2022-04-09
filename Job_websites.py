@@ -1,4 +1,5 @@
 import requests, bs4, validators
+from time import sleep
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
@@ -7,7 +8,7 @@ job_offers_combined = []
 
 browser = webdriver.Firefox()
 
-buzzwords = ["synthetic biology", "synthetic biologist"]
+buzzwords = ["synthetic biology", "synthetic biologist", "strain engineering", "protein engineering"]
 job_types = ["Full Time", "Industry", "Internship", "PhD", "PostDoc", "StartUp"]
 job_types_dict = dict(Full_Time=["Full Time", "Vollzeit"],
                       Industry=["Industry", "Industrie"],
@@ -81,10 +82,26 @@ def jobvector_accept_privacy():
         pass  # nothing to do when there are no cookies to accept
 
 
+def jobvector_decline_newsletter():
+    try:
+        decline = browser.find_element(by=By.CSS_SELECTOR,
+                                       value='#__layout > div > div > div.navbar-background.no-print.no-print > '
+                                             'div:nth-child(2) > div > svg')
+        if decline.is_displayed():
+            decline.click()
+    except Exception as exc:
+        print('There is a problem with declining the newsletter: %s' % (exc))
+        #pass  # nothing to do when there is no newsletter-overlay
+
+
 def jobvector_parse_offer(jobvector_offer):
     try:
+        sleep(1)
         jobvector_accept_privacy()
+        jobvector_decline_newsletter()
         jobvector_offer.click()
+        sleep(0.5)
+        jobvector_decline_newsletter()
         # parsing of information
         title = browser.find_element(by=By.CSS_SELECTOR, value="#__layout > div > div > div.paneview > "
                                                                "div.columns.is-gapless.paneview-main > "
@@ -146,7 +163,7 @@ except Exception as exc:
 
 browser.quit()
 
-print(str(len(job_offers_combined)) + " job offers were found:")
+print(str(len(job_offers_combined)) + " synbio job offers were found:")
 for job_offer in job_offers_combined:
     print(job_offer.title + " (" + job_offer.company + ")")
 

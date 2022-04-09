@@ -85,6 +85,7 @@ try:
                     description = description_elements[i].text
 
             if is_synbio_job(title, description):
+                print(title)
                 synbio_job_count += 1
                 providers = browser.find_elements(by=By.CLASS_NAME, value="va9cAf")
                 for provider in providers:
