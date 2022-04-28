@@ -3,6 +3,7 @@ import csv
 from time import sleep
 from datetime import date
 from selenium import webdriver
+from Offer_validation import JobOffer, buzzwords, job_types, job_types_dict, is_synbio_job
 from selenium.webdriver.common.by import By
 
 """
@@ -15,7 +16,8 @@ The script generates an output csv file which the number of synbio jobs found on
 """
 
 
-buzzwords = ["synthetic biology", "synthetic biologist", "strain engineering", "protein engineering"]
+# Determines whether to filter results for synbio jobs
+do_filtering = True
 
 
 # changes output file name if it already exists
@@ -28,18 +30,6 @@ def uniquify(path):
         counter += 1
 
     return path
-
-
-# checks for buzzwords to distinguish if it's a synbio job
-def is_synbio_job(title, description):
-    is_valid = False
-    # convert to lower case for case-insensitive comparison
-    title = title.lower()
-    for term in buzzwords:
-        if title.find(term) > -1 or description.find(term) > -1:
-            is_valid = True
-            break
-    return is_valid
 
 
 browser = webdriver.Firefox()
@@ -72,6 +62,7 @@ try:
                     title = title_elements[i].text
                     break
 
+            # click 'show full description' button
             expand_button_elements = browser.find_elements(by=By.CLASS_NAME, value="OSrXXb")
             for button in expand_button_elements:
                 if button.is_displayed():
@@ -84,19 +75,33 @@ try:
                 if description_elements[i].is_displayed():
                     description = description_elements[i].text
 
-            if is_synbio_job(title, description):
+            jobtype_info_elem = browser.find_elements(by=By.CLASS_NAME, value="I2Cbhb")
+            jobtype_info = [x.text for x in jobtype_info_elem]
+            jobtypes_found = []
+            for job_type in job_types_dict.values():
+                for term in job_type:
+                    if term in jobtype_info or title.find(term) > -1:
+                        jobtypes_found.append(job_type[0])
+                        break
+
+            # TODO: Get name of company/institution that is offering the job
+
+            if not do_filtering or is_synbio_job(title, description):
                 print(title)
                 synbio_job_count += 1
                 providers = browser.find_elements(by=By.CLASS_NAME, value="va9cAf")
                 for provider in providers:
                     if provider.is_displayed():
                         key = provider.text[15:]
+                        # A-New-Career job website has a number in its name which would make counting difficult
                         if key.find("Live Jobs At A-New-Career") > -1:
                             key = "A-New-Career"
                         if key in offer_count.keys():
                             offer_count[key] += 1
                         else:
                             offer_count[key] = 1
+
+                # TODO: Create JobOffer object
 
         except Exception as exc:
             print('No providers found for job offer: %s' % (exc))
@@ -107,10 +112,22 @@ except Exception as exc:
 
 browser.quit()
 
-print(str(synbio_job_count), " SynBio jobs have been found.")
+if do_filtering:
+    print(str(synbio_job_count), " SynBio jobs have been found.")
+else:
+    print(str(synbio_job_count), " jobs have been found.")
 
-file_name = uniquify("Job_site_comparison_" + date.today().strftime("%y-%m-%d") + ".csv")
+if do_filtering:
+    file_name = uniquify("Job_site_comparison_" + date.today().strftime("%y-%m-%d") + "_synbio.csv")
+else:
+    file_name = uniquify("Job_site_comparison_" + date.today().strftime("%y-%m-%d") + "_all.csv")
 
+# TODO: Save all JobOffer objects to file
+
+# TODO: Read last file of saved JobOffers
+
+# TODO: Compare old and new JobOffers to find Offers that were published or removed since the last run,
+#  report these changes
 
 # write generated statistics in csv file
 with open(file_name, "w") as out_file:
