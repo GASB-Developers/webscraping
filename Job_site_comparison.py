@@ -17,7 +17,7 @@ The script generates an output csv file which the number of synbio jobs found on
 
 
 # Determines whether to filter results for synbio jobs
-do_filtering = True
+do_filtering = False
 
 
 # changes output file name if it already exists
@@ -84,10 +84,28 @@ try:
                         jobtypes_found.append(job_type[0])
                         break
 
-            # TODO: Get name of company/institution that is offering the job
+            # TODO: Fix problem that location and/or company is sometimes not found, even when displayed
+            company_elements = browser.find_elements(by=By.CLASS_NAME, value="nJlQNd")
+            company = ""
+            for i in range(0, len(company_elements)):
+                if company_elements[i].is_displayed():
+                    company = company_elements[i].text
+                    print(company)
+                    break
+
+            location_elements = browser.find_elements(by=By.CLASS_NAME, value="sMzDkb")
+            location = ""
+            for i in range(0, len(location_elements)):
+                if location_elements[i].is_displayed():
+                    location = location_elements[i].text
+                    # Cut string if additional locations are mentioned; for uniformity
+                    if location.find("weitere Standorte") != -1:
+                        location = location[:location.find("(")-1]
+
 
             if not do_filtering or is_synbio_job(title, description):
                 print(title)
+                print("")
                 synbio_job_count += 1
                 providers = browser.find_elements(by=By.CLASS_NAME, value="va9cAf")
                 for provider in providers:
