@@ -1,3 +1,6 @@
+import validators
+import textwrap as tr
+
 buzzwords = ["synthetic biology", "synthetic biologist", "strain engineering", "protein engineering"]
 job_types = ["Full Time", "Industry", "Internship", "PhD", "PostDoc", "StartUp"]
 job_types_dict = dict(Full_Time=["Full Time", "Vollzeit"],
@@ -31,6 +34,15 @@ class JobOffer:
         self.description = description
         self.company = company
 
+    def __str__(self):
+        return "Title: {}\nDescription: {}\nCompany: {}\nJob-Type: {}\nApplication-URL: {}\n"\
+            .format(self.title, tr.shorten(self.description, width=100, placeholder=" [...]"),
+                    self.company, ", ".join(self.job_type), self.application_address_url)
+
+    # comparison of objects
+    def __eq__(self, other):
+        return self.title == other.title and self.description == other.description and self.company == other.company \
+               and self.job_type == other.job_type and self.application_address_url == other.application_address_url
 
 def is_synbio_job(title, description):
     is_valid = False

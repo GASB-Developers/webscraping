@@ -1,5 +1,6 @@
 import os
 import csv
+import pickle
 from time import sleep
 from datetime import date
 from selenium import webdriver
@@ -15,9 +16,12 @@ in order to scrape all results. After 15 seconds the script starts scraping.
 The script generates an output csv file which the number of synbio jobs found on each web site.
 """
 
+# TODO: Automatic cookie-acceptance and scrolling
+
+# TODO: Generation of .csv file of running times/dates and number of added/removed job offers for analysis
 
 # Determines whether to filter results for synbio jobs
-do_filtering = False
+do_filtering = True
 
 
 # changes output file name if it already exists
@@ -37,11 +41,20 @@ browser = webdriver.Firefox()
 # url of google search results for synbio jobs
 google_jobs_url = "https://www.google.com/search?q=job+offers+synthetic+biology&oq=job+offers+synthetic+biology&ibp=htl;jobs&sa=X"
 
+# Name of output file to store JobOffer objects
+job_offers_file_name = "Job_offers_last_run.list"
+
 browser.get(google_jobs_url)
 
+# Dictionary to count occurrences of each provider of job offers
 offer_count = {}
 
+# Counter for number of found synbio jobs
 synbio_job_count = 0
+
+# List for JobOffer objects generated for found synbio jobs, is stored to hard drive
+synbio_job_list = []
+
 
 try:
     # Sleep time for manually accept cookies and scroll down in search results
@@ -90,7 +103,6 @@ try:
             for i in range(0, len(company_elements)):
                 if company_elements[i].is_displayed():
                     company = company_elements[i].text
-                    print(company)
                     break
 
             location_elements = browser.find_elements(by=By.CLASS_NAME, value="sMzDkb")
@@ -104,8 +116,6 @@ try:
 
 
             if not do_filtering or is_synbio_job(title, description):
-                print(title)
-                print("")
                 synbio_job_count += 1
                 providers = browser.find_elements(by=By.CLASS_NAME, value="va9cAf")
                 for provider in providers:
@@ -119,7 +129,13 @@ try:
                         else:
                             offer_count[key] = 1
 
-                # TODO: Create JobOffer object
+            if is_synbio_job(title, description):
+                try:
+                    offer = JobOffer(title, jobtypes_found, description, browser.current_url, company)
+                    synbio_job_list.append(offer)
+                    #print(offer)
+                except Exception as exc:
+                    print(exc)
 
         except Exception as exc:
             print('No providers found for job offer: %s' % (exc))
@@ -136,19 +152,39 @@ else:
     print(str(synbio_job_count), " jobs have been found.")
 
 if do_filtering:
-    file_name = uniquify("Job_site_comparison_" + date.today().strftime("%y-%m-%d") + "_synbio.csv")
+    stats_file_name = uniquify("Job_site_comparison_" + date.today().strftime("%y-%m-%d") + "_synbio.csv")
 else:
-    file_name = uniquify("Job_site_comparison_" + date.today().strftime("%y-%m-%d") + "_all.csv")
+    stats_file_name = uniquify("Job_site_comparison_" + date.today().strftime("%y-%m-%d") + "_all.csv")
 
-# TODO: Save all JobOffer objects to file
+# Read last file of saved JobOffers
+if os.path.exists(job_offers_file_name):
+    with open(job_offers_file_name, "rb") as job_offers_file:
+        synbio_job_list_old = pickle.load(job_offers_file)
 
-# TODO: Read last file of saved JobOffers
+    # Compare old and new JobOffers to find Offers that were published or removed since the last run,
+    # report these changes
+    removed_offers = [item for item in synbio_job_list_old if item not in synbio_job_list]
+    new_offers = [item for item in synbio_job_list if item not in synbio_job_list_old]
+    if len(removed_offers) != 0:
+        print("\n--- REMOVED JOB OFFERS ({}) ---\n".format(len(removed_offers)))
+        for offer in removed_offers:
+            print(offer)
+    else:
+        print("\n--- No job offer was removed ---\n")
+    if len(new_offers) != 0:
+        print("\n--- NEW JOB OFFERS ({}) ---\n".format(len(new_offers)))
+        for offer in new_offers:
+            print(offer)
+    else:
+        print("\n--- No job offer was added ---\n")
 
-# TODO: Compare old and new JobOffers to find Offers that were published or removed since the last run,
-#  report these changes
+# Save all JobOffer objects to file
+with open(job_offers_file_name, "wb") as job_offers_file:
+    pickle.dump(synbio_job_list, job_offers_file)
+
 
 # write generated statistics in csv file
-with open(file_name, "w") as out_file:
+with open(stats_file_name, "w") as out_file:
     dict_keys = list(offer_count.keys())
     dict_keys.sort()
     writer = csv.DictWriter(out_file, dict_keys)
