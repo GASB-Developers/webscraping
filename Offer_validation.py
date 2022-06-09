@@ -44,6 +44,10 @@ class JobOffer:
         return self.title == other.title and self.description == other.description and self.company == other.company \
                and self.job_type == other.job_type and self.application_address_url == other.application_address_url
 
+    # generate string for .csv file, representing object
+    def csv_line(self):
+        return [self.title, self.description, self.company, ", ".join(self.job_type), self.application_address_url]
+
 def is_synbio_job(title, description):
     is_valid = False
     # convert to lower case for case-insensitive comparison

@@ -20,6 +20,8 @@ The script generates an output csv file which the number of synbio jobs found on
 
 # TODO: Generation of .csv file of running times/dates and number of added/removed job offers for analysis
 
+# TODO: Addition of expiry date to job-offer csv (e.g. one week from today), modification of import template
+
 # Determines whether to filter results for synbio jobs
 do_filtering = True
 
@@ -182,6 +184,12 @@ if os.path.exists(job_offers_file_name):
 with open(job_offers_file_name, "wb") as job_offers_file:
     pickle.dump(synbio_job_list, job_offers_file)
 
+# Generate csv file for upload to website
+with open("export.csv", "w", newline="") as csv_file:
+    csv_writer = csv.writer(csv_file, delimiter=";")
+    csv_writer.writerow(["title", "description", "company", "job-type", "application-url"])
+    for offer in synbio_job_list:
+        csv_writer.writerow(offer.csv_line())
 
 # write generated statistics in csv file
 with open(stats_file_name, "w") as out_file:
