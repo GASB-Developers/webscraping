@@ -20,7 +20,7 @@ The script generates an output csv file which the number of synbio jobs found on
 
 # TODO: Generation of .csv file of running times/dates and number of added/removed job offers for analysis
 
-# TODO: Addition of expiry date to job-offer csv (e.g. one week from today), modification of import template
+# TODO: Scrape and export publishing date of job offers for use instead of upload date
 
 # Determines whether to filter results for synbio jobs
 do_filtering = True
@@ -90,8 +90,12 @@ try:
                 if description_elements[i].is_displayed():
                     description = description_elements[i].text
 
-            jobtype_info_elem = browser.find_elements(by=By.CLASS_NAME, value="I2Cbhb")
-            jobtype_info = [x.text for x in jobtype_info_elem]
+            jobtype_info_elem = browser.find_elements(by=By.CSS_SELECTOR,
+                                                      value="#gws-plugins-horizon-jobs__job_details_page > div > div.ocResc > div:nth-child(2) > span.LL4CDc")
+            jobtype_info = []
+            for i in range(0, len(jobtype_info_elem)):
+                if jobtype_info_elem[i].is_displayed():
+                    jobtype_info.append(jobtype_info_elem[i].text)
             jobtypes_found = []
             for job_type in job_types_dict.values():
                 for term in job_type:
@@ -185,9 +189,9 @@ with open(job_offers_file_name, "wb") as job_offers_file:
     pickle.dump(synbio_job_list, job_offers_file)
 
 # Generate csv file for upload to website
-with open("export.csv", "w", newline="") as csv_file:
+with open("export.csv", "w", newline="", encoding="utf-8") as csv_file:
     csv_writer = csv.writer(csv_file, delimiter=";")
-    csv_writer.writerow(["title", "description", "company", "job-type", "application-url"])
+    csv_writer.writerow(["title", "description", "company", "job-type", "application-url", "expiry-date"])
     for offer in synbio_job_list:
         csv_writer.writerow(offer.csv_line())
 

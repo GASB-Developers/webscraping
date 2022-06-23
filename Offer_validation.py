@@ -1,9 +1,10 @@
 import validators
 import textwrap as tr
+from datetime import date, timedelta
 
 buzzwords = ["synthetic biology", "synthetic biologist", "strain engineering", "protein engineering"]
-job_types = ["Full Time", "Industry", "Internship", "PhD", "PostDoc", "StartUp"]
-job_types_dict = dict(Full_Time=["Full Time", "Vollzeit"],
+job_types = ["Part-time", "Industry", "Internship", "PhD", "PostDoc", "StartUp"]
+job_types_dict = dict(Full_Time=["Part-time", "Part time", "part time", "part-time", "Teilzeit"],
                       Industry=["Industry", "Industrie"],
                       Internship=["Internship", "Praktikum"],
                       PhD=["PhD", "Promotion"],
@@ -46,7 +47,11 @@ class JobOffer:
 
     # generate string for .csv file, representing object
     def csv_line(self):
-        return [self.title, self.description, self.company, ", ".join(self.job_type), self.application_address_url]
+        # job offer expires after one week (planned frequency for actualization of website)
+        expiry_date = str(date.today() + timedelta(days=7))
+        return [self.title, self.description, self.company, ", ".join(self.job_type), self.application_address_url,
+                expiry_date]
+
 
 def is_synbio_job(title, description):
     is_valid = False
