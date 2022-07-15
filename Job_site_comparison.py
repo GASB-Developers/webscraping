@@ -22,6 +22,8 @@ The script generates an output csv file which the number of synbio jobs found on
 
 # TODO: Scrape and export publishing date of job offers for use instead of upload date
 
+# TODO: Scrape and export location of job
+
 # Determines whether to filter results for synbio jobs
 do_filtering = True
 
