@@ -24,6 +24,8 @@ The script generates an output csv file which the number of synbio jobs found on
 
 # TODO: Scrape and export location of job
 
+# TODO: Remove duplicate job offers when same description
+
 # Determines whether to filter results for synbio jobs
 do_filtering = True
 
