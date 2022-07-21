@@ -26,6 +26,8 @@ The script generates an output csv file which the number of synbio jobs found on
 
 # TODO: Remove duplicate job offers when same description
 
+# TODO: Automated text-formatting possible?
+
 # Determines whether to filter results for synbio jobs
 do_filtering = True
 
