@@ -48,7 +48,7 @@ class JobOffer:
     # generate string for .csv file, representing object
     def csv_line(self):
         # job offer expires after one week (planned frequency for actualization of website)
-        expiry_date = str(date.today() + timedelta(days=7))
+        expiry_date = str(date.today() + timedelta(days=14))  # TODO: change back to 7
         return [self.title, self.description, self.company, ", ".join(self.job_type), self.application_address_url,
                 expiry_date]
 
