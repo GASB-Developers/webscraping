@@ -14,7 +14,7 @@ job_types_dict = dict(Full_Time=["Part-time", "Part time", "part time", "part-ti
 
 ### Definition of data-type to store job offers ###
 class JobOffer:
-    def __init__(self, title, job_type, description, application_address_url, company):
+    def __init__(self, title, job_type, description, application_address_url, company, location):
         # verify title
         if not is_synbio_job(title, description):
             raise Exception("Seems not to be a SynBio job! It has to contain one of the pre-defined buzzwords.")
@@ -34,23 +34,30 @@ class JobOffer:
         self.title = title
         self.description = description
         self.company = company
+        self.location = location
 
     def __str__(self):
-        return "Title: {}\nDescription: {}\nCompany: {}\nJob-Type: {}\nApplication-URL: {}\n"\
+        return "Title: {}\nDescription: {}\nCompany: {}\nLocation: {}\nJob-Type: {}\nApplication-URL: {}\n"\
             .format(self.title, tr.shorten(self.description, width=100, placeholder=" [...]"),
-                    self.company, ", ".join(self.job_type), self.application_address_url)
+                    self.company, self.location, ", ".join(self.job_type), self.application_address_url)
 
     # comparison of objects
     def __eq__(self, other):
         return self.title == other.title and self.description == other.description and self.company == other.company \
-               and self.job_type == other.job_type and self.application_address_url == other.application_address_url
+               and self.job_type == other.job_type and self.application_address_url == other.application_address_url \
+               and self.location == other.location
+
+    # decide whether two offers are duplicates of each other TODO: make duplicate identification more precise
+    def is_duplicate(self, other):
+        return self.description == other.description \
+               or self.title == other.title and self.location == other.location
 
     # generate string for .csv file, representing object
     def csv_line(self):
         # job offer expires after one week (planned frequency for actualization of website)
         expiry_date = str(date.today() + timedelta(days=7))
         return [self.title, self.description, self.company, ", ".join(self.job_type), self.application_address_url,
-                expiry_date]
+                expiry_date, self.location]
 
 
 def is_synbio_job(title, description):

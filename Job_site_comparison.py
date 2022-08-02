@@ -22,14 +22,18 @@ The script generates an output csv file which the number of synbio jobs found on
 
 # TODO: Scrape and export publishing date of job offers for use instead of upload date
 
-# TODO: Scrape and export location of job
-
-# TODO: Remove duplicate job offers when same description
-
 # TODO: Automated text-formatting possible?
 
 # Determines whether to filter results for synbio jobs
 do_filtering = True
+
+
+# url of google search results for synbio jobs
+google_jobs_url = "https://www.google.com/search?q=job+offers+synthetic+biology&oq=job+offers+synthetic+biology&ibp=htl;jobs&sa=X"
+
+
+# Name of output file to store JobOffer objects
+job_offers_file_name = "Job_offers_last_run.list"
 
 
 # changes output file name if it already exists
@@ -45,12 +49,6 @@ def uniquify(path):
 
 
 browser = webdriver.Firefox()
-
-# url of google search results for synbio jobs
-google_jobs_url = "https://www.google.com/search?q=job+offers+synthetic+biology&oq=job+offers+synthetic+biology&ibp=htl;jobs&sa=X"
-
-# Name of output file to store JobOffer objects
-job_offers_file_name = "Job_offers_last_run.list"
 
 browser.get(google_jobs_url)
 
@@ -84,6 +82,7 @@ try:
                     break
 
             # click 'show full description' button
+            # otherwise some part of the description might be missing
             expand_button_elements = browser.find_elements(by=By.CLASS_NAME, value="OSrXXb")
             for button in expand_button_elements:
                 if button.is_displayed():
@@ -126,7 +125,6 @@ try:
                     if location.find("weitere Standorte") != -1:
                         location = location[:location.find("(")-1]
 
-
             if not do_filtering or is_synbio_job(title, description):
                 synbio_job_count += 1
                 providers = browser.find_elements(by=By.CLASS_NAME, value="va9cAf")
@@ -143,7 +141,7 @@ try:
 
             if is_synbio_job(title, description):
                 try:
-                    offer = JobOffer(title, jobtypes_found, description, browser.current_url, company)
+                    offer = JobOffer(title, jobtypes_found, description, browser.current_url, company, location)
                     synbio_job_list.append(offer)
                     #print(offer)
                 except Exception as exc:
@@ -157,6 +155,27 @@ except Exception as exc:
 
 
 browser.quit()
+
+# Remove duplicates
+not_duplicated = [synbio_job_list[0]]
+for i in range(1, len(synbio_job_list)):
+    duplicated = False
+    for j in range(0, len(not_duplicated)):
+        if synbio_job_list[i].is_duplicate(not_duplicated[j]):
+            duplicated = True
+            break
+    if not duplicated:
+        not_duplicated.append(synbio_job_list[i])
+# Report which offers where removed as duplicates for check by user
+removed_duplicates = [item for item in synbio_job_list if item not in not_duplicated]
+if len(removed_duplicates) != 0:
+    print("\n--- REMOVED DUPLICATES ({}) ---\n".format(len(removed_duplicates)))
+    for offer in removed_duplicates:
+        print(offer)
+else:
+    print("\n--- No duplicates were removed ---\n")
+synbio_job_list = not_duplicated
+
 
 if do_filtering:
     print(str(synbio_job_count), " SynBio jobs have been found.")
@@ -178,17 +197,17 @@ if os.path.exists(job_offers_file_name):
     removed_offers = [item for item in synbio_job_list_old if item not in synbio_job_list]
     new_offers = [item for item in synbio_job_list if item not in synbio_job_list_old]
     if len(removed_offers) != 0:
-        print("\n--- REMOVED JOB OFFERS ({}) ---\n".format(len(removed_offers)))
+        print("\n--- REMOVED JOB OFFERS SINCE LAST SEARCH ({}) ---\n".format(len(removed_offers)))
         for offer in removed_offers:
             print(offer)
     else:
-        print("\n--- No job offer was removed ---\n")
+        print("\n--- No job offer was removed since last search ---\n")
     if len(new_offers) != 0:
-        print("\n--- NEW JOB OFFERS ({}) ---\n".format(len(new_offers)))
+        print("\n--- NEW JOB OFFERS SINCE LAST SEARCH ({}) ---\n".format(len(new_offers)))
         for offer in new_offers:
             print(offer)
     else:
-        print("\n--- No job offer was added ---\n")
+        print("\n--- No job offer was added since last search ---\n")
 
 # Save all JobOffer objects to file
 with open(job_offers_file_name, "wb") as job_offers_file:
@@ -197,12 +216,12 @@ with open(job_offers_file_name, "wb") as job_offers_file:
 # Generate csv file for upload to website
 with open("export.csv", "w", newline="", encoding="utf-8") as csv_file:
     csv_writer = csv.writer(csv_file, delimiter=";")
-    csv_writer.writerow(["title", "description", "company", "job-type", "application-url", "expiry-date"])
+    csv_writer.writerow(["title", "description", "company", "job-type", "application-url", "expiry-date", "location"])
     for offer in synbio_job_list:
         csv_writer.writerow(offer.csv_line())
 
 # write generated statistics in csv file
-with open(stats_file_name, "w") as out_file:
+with open(stats_file_name, "w", encoding="utf-8") as out_file:
     dict_keys = list(offer_count.keys())
     dict_keys.sort()
     writer = csv.DictWriter(out_file, dict_keys)
