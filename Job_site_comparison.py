@@ -20,8 +20,6 @@ The script generates an output csv file which the number of synbio jobs found on
 
 # TODO: Generation of .csv file of running times/dates and number of added/removed job offers for analysis
 
-# TODO: Scrape and export publishing date of job offers for use instead of upload date
-
 # TODO: Automated text-formatting possible?
 
 # Determines whether to filter results for synbio jobs
@@ -158,7 +156,6 @@ try:
                     offer = JobOffer(title, jobtypes_found, description, browser.current_url,
                                      company, location, post_date)
                     synbio_job_list.append(offer)
-                    #print(offer.comparable_title())
                 except Exception as exc:
                     print(exc)
 

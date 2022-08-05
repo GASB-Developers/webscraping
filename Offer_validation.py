@@ -54,10 +54,15 @@ class JobOffer:
         return self.description == other.description \
                or self.has_same_title(other) and self.location == other.location
 
+    # applies several string operations to the title of a job offer in order to make comparison easier
     def comparable_title(self):
+        # convert to lower case
         title1 = self.title.lower()
+        # remove e.g. (m/w/d) addition
         title1 = re.sub(" \(.{3,7}\)", "", title1)
+        # remove mfd addition that is not covered by regular expression
         title1 = title1.replace(" mfd", "")
+        # remove special/uninformative characters
         title1 = title1.replace(",", "")
         title1 = title1.replace(" -", "")
         title1 = title1.replace("-", " ")
@@ -67,11 +72,14 @@ class JobOffer:
         title1 = title1.replace("“", "")
         return title1
 
+    # check whether two job offers have (nearly) the same title
+    # when the order of words is altered, but all can be found in the other one,
+    # both titles are still considered to be the same
     def has_same_title(self, other):
-        #print(self.title)
-        #print(other.title)
         title1 = self.comparable_title().split(" ")
         title2 = other.comparable_title().split(" ")
+        # check if all terms contained in one title can be found in the other one
+        # this relationship does not need to be bidirectional, in case one title is cut-off for example
         one_in_two = True
         for term in title1:
             if term not in title2:
@@ -82,8 +90,6 @@ class JobOffer:
             if term not in title1:
                 two_in_one = False
                 break
-        #print(one_in_two or two_in_one)
-        #print("\n")
         return one_in_two or two_in_one
 
     # generate string for .csv file, representing object
