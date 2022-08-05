@@ -2,7 +2,7 @@ import os
 import csv
 import pickle
 from time import sleep
-from datetime import date
+from datetime import date, timedelta
 from selenium import webdriver
 from Offer_validation import JobOffer, buzzwords, job_types, job_types_dict, is_synbio_job
 from selenium.webdriver.common.by import By
@@ -96,7 +96,8 @@ try:
                     description = description_elements[i].text
 
             jobtype_info_elem = browser.find_elements(by=By.CSS_SELECTOR,
-                                                      value="#gws-plugins-horizon-jobs__job_details_page > div > div.ocResc > div:nth-child(2) > span.LL4CDc")
+                                                      value="#gws-plugins-horizon-jobs__job_details_page > div > "
+                                                            "div.ocResc > div:nth-child(2) > span.LL4CDc")
             jobtype_info = []
             for i in range(0, len(jobtype_info_elem)):
                 if jobtype_info_elem[i].is_displayed():
@@ -125,6 +126,19 @@ try:
                     if location.find("weitere Standorte") != -1:
                         location = location[:location.find("(")-1]
 
+            post_time_elements = browser.find_elements(by=By.CSS_SELECTOR,
+                                                       value="#gws-plugins-horizon-jobs__job_details_page > div > "
+                                                             "div.ocResc > div:nth-child(1) > span.LL4CDc > span")
+            post_date = str(date.today())
+            for i in range(0, len(post_time_elements)):
+                if post_time_elements[i].is_displayed():
+                    post_time = post_time_elements[i].text
+                    post_time = post_time.split(" ")[1]
+                    try:
+                        post_date = str(date.today() - timedelta(days=float(post_time)))
+                    except Exception as e:
+                        post_date = str(date.today())
+
             if not do_filtering or is_synbio_job(title, description):
                 synbio_job_count += 1
                 providers = browser.find_elements(by=By.CLASS_NAME, value="va9cAf")
@@ -141,9 +155,10 @@ try:
 
             if is_synbio_job(title, description):
                 try:
-                    offer = JobOffer(title, jobtypes_found, description, browser.current_url, company, location)
+                    offer = JobOffer(title, jobtypes_found, description, browser.current_url,
+                                     company, location, post_date)
                     synbio_job_list.append(offer)
-                    #print(offer)
+                    #print(offer.comparable_title())
                 except Exception as exc:
                     print(exc)
 
@@ -216,7 +231,8 @@ with open(job_offers_file_name, "wb") as job_offers_file:
 # Generate csv file for upload to website
 with open("export.csv", "w", newline="", encoding="utf-8") as csv_file:
     csv_writer = csv.writer(csv_file, delimiter=";")
-    csv_writer.writerow(["title", "description", "company", "job-type", "application-url", "expiry-date", "location"])
+    csv_writer.writerow(["title", "description", "company", "job-type", "application-url",
+                         "post-date", "expiry-date", "location"])
     for offer in synbio_job_list:
         csv_writer.writerow(offer.csv_line())
 
