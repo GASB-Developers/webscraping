@@ -22,6 +22,8 @@ The script generates an output csv file which the number of synbio jobs found on
 
 # TODO: Automated text-formatting possible?
 
+# TODO: Fix upload of location (Google API needed?)
+
 # Determines whether to filter results for synbio jobs
 do_filtering = True
 
