@@ -8,9 +8,9 @@ job_types = ["Part-time", "Industry", "Internship", "PhD", "PostDoc", "StartUp"]
 job_types_dict = dict(Full_Time=["Part-time", "Part time", "part time", "part-time", "Teilzeit"],
                       Industry=["Industry", "Industrie"],
                       Internship=["Internship", "Praktikum"],
-                      PhD=["PhD", "Promotion"],
+                      PhD=["PhD", "Promotion", "PHD"],
                       PostDoc=["PostDoc", "Post-Doc", "Post Doc", "Postdoctoral", "post-doc", "postdoc",
-                               "postdoctoral"],
+                               "postdoctoral", "Postdoc"],
                       StartUp=["StartUp", "Startup"])
 
 ### Definition of data-type to store job offers ###
@@ -94,8 +94,9 @@ class JobOffer:
 
     # generate string for .csv file, representing object
     def csv_line(self):
-        # job offer expires after one week (planned frequency for actualization of website)
-        expiry_date = str(date.today() + timedelta(days=7))
+        # job offer expires after two weeks
+        # (planned frequency for actualization of website is one week, with some margin for delay)
+        expiry_date = str(date.today() + timedelta(days=14))
         return [self.title, self.description, self.company, ", ".join(self.job_type), self.application_address_url,
                 self.post_date, expiry_date, self.location]
 
