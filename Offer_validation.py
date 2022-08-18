@@ -51,8 +51,10 @@ class JobOffer:
 
     # decide whether two offers are duplicates of each other TODO: make duplicate identification more precise
     def is_duplicate(self, other):
+        # does the case occur, that one company offers two distinct jobs with the same title?
         return self.description == other.description \
-               or self.has_same_title(other) and self.location == other.location
+               or self.has_same_title(other) and self.location == other.location \
+               or self.has_same_title(other) and self.company == other.company
 
     # applies several string operations to the title of a job offer in order to make comparison easier
     def comparable_title(self):
