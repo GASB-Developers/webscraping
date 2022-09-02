@@ -228,7 +228,8 @@ with open(job_offers_file_name, "wb") as job_offers_file:
     pickle.dump(synbio_job_list, job_offers_file)
 
 # Generate csv file for upload to website
-with open("export.csv", "w", newline="", encoding="utf-8") as csv_file:
+export_file_name = uniquify("export_files/export_" + date.today().strftime("%y-%m-%d") + ".csv")
+with open(export_file_name, "w", newline="", encoding="utf-8") as csv_file:
     csv_writer = csv.writer(csv_file, delimiter=";")
     csv_writer.writerow(["title", "description", "company", "job-type", "application-url",
                          "post-date", "expiry-date", "location"])
