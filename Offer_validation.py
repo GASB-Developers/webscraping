@@ -50,6 +50,7 @@ class JobOffer:
                and self.location == other.location and self.post_date == other.post_date
 
     # decide whether two offers are duplicates of each other TODO: make duplicate identification more precise
+    # TODO: Consider case when the same company is written differently
     def is_duplicate(self, other):
         # does the case occur, that one company offers two distinct jobs with the same title?
         return self.description == other.description \
