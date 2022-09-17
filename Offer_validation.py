@@ -73,6 +73,7 @@ class JobOffer:
         title1 = title1.replace("...", "")
         title1 = title1.replace("\"", "")
         title1 = title1.replace("“", "")
+        title1 = title1.replace("/", "")
         return title1
 
     # check whether two job offers have (nearly) the same title
