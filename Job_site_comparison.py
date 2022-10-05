@@ -22,6 +22,8 @@ The script generates an output csv file which the number of synbio jobs found on
 
 # TODO: Automated text-formatting possible?
 
+# TODO: Exclude offers that were found on the GASB site
+
 
 # Determines whether to filter results for synbio jobs
 do_filtering = True
