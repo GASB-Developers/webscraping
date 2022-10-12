@@ -4,7 +4,7 @@ import pickle
 from time import sleep
 from datetime import date, timedelta
 from selenium import webdriver
-from Offer_validation import JobOffer, buzzwords, job_types, job_types_dict, is_synbio_job
+from Offer_validation import JobOffer, buzzwords, job_types, job_types_dict, is_synbio_job, is_GASB_job
 from selenium.webdriver.common.by import By
 
 """
@@ -22,7 +22,7 @@ The script generates an output csv file which the number of synbio jobs found on
 
 # TODO: Automated text-formatting possible?
 
-# TODO: Exclude offers that were found on the GASB site
+# TODO: Remove job offers that are filled/expired (e.g. follow URL, search for date or expiry notification)
 
 
 # Determines whether to filter results for synbio jobs
@@ -140,6 +140,8 @@ try:
                     except Exception as e:
                         post_date = str(date.today())
 
+            # List to store providers for current job
+            providers_for_offer = []
             if not do_filtering or is_synbio_job(title, description):
                 synbio_job_count += 1
                 providers = browser.find_elements(by=By.CLASS_NAME, value="va9cAf")
@@ -153,8 +155,10 @@ try:
                             offer_count[key] += 1
                         else:
                             offer_count[key] = 1
+                        # Store each provider of current job
+                        providers_for_offer.append(key)
 
-            if is_synbio_job(title, description):
+            if is_synbio_job(title, description) and not is_GASB_job(providers_for_offer):
                 try:
                     offer = JobOffer(title, jobtypes_found, description, browser.current_url,
                                      company, location, post_date)

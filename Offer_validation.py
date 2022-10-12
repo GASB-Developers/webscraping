@@ -71,6 +71,8 @@ class JobOffer:
         title1 = title1.replace("-", " ")
         title1 = title1.replace(" –", "")
         title1 = title1.replace("...", "")
+        title1 = title1.replace("…", "")
+        title1 = title1.replace(".", "")
         title1 = title1.replace("\"", "")
         title1 = title1.replace("“", "")
         title1 = title1.replace("/", "")
@@ -114,6 +116,10 @@ def is_synbio_job(title, description):
             is_valid = True
             break
     return is_valid
+
+
+def is_GASB_job(providers_for_offer):
+    return len(providers_for_offer) == 1 and providers_for_offer[0] == "German Association For Synthetic Biology"
 
 
 def is_job_type_valid(job_type):
