@@ -16,13 +16,22 @@ in order to scrape all results. After 15 seconds the script starts scraping.
 The script generates an output csv file which the number of synbio jobs found on each web site.
 """
 
-# TODO: Automatic cookie-acceptance and scrolling
+# TODO: Automatic cookie-acceptance and scrolling, necessary to extend job search!
+
+# TODO: Optimize duplicate-detection, necessary to extend job search!
 
 # TODO: Generation of .csv file of running times/dates and number of added/removed job offers for analysis
 
 # TODO: Automated text-formatting possible?
 
 # TODO: Remove job offers that are filled/expired (e.g. follow URL, search for date or expiry notification)
+
+# TODO: Add jobs in other countries (neighbor countries, or most relevant),
+#  e.g. modification of job page to display Germany as default
+
+# TODO: Add Bachelor- and Master-theses offers (additional searches)
+
+# TODO: Extend search terms (e.g. biotechnology, ...-engineering, ...)
 
 
 # Determines whether to filter results for synbio jobs
