@@ -50,12 +50,119 @@ job_offers_file_name = "Job_offers_last_run.list"
 def uniquify(path):
     filename, extension = os.path.splitext(path)
     counter = 1
-
     while os.path.exists(path):
         path = filename + " (" + str(counter) + ")" + extension
         counter += 1
-
     return path
+
+
+# checks whether a job offer is already expired
+def is_expired():
+    pass
+
+
+def get_title():
+    title_elements = browser.find_elements(by=By.CLASS_NAME, value="KLsYvd")
+    offer_title = ""
+    for i in range(0, len(title_elements)):
+        if title_elements[i].is_displayed():
+            offer_title = title_elements[i].text
+            break
+    return offer_title
+
+
+def get_description():
+    description_elements = browser.find_elements(by=By.CLASS_NAME, value="HBvzbc")
+    offer_description = ""
+    for i in range(0, len(description_elements)):
+        if description_elements[i].is_displayed():
+            offer_description = description_elements[i].text
+    return offer_description
+
+
+def get_job_types():
+    jobtype_info_elem = browser.find_elements(by=By.CSS_SELECTOR,
+                                              value="#gws-plugins-horizon-jobs__job_details_page > div > "
+                                                    "div.ocResc > div:nth-child(2) > span.LL4CDc")
+    jobtype_info = []
+    for i in range(0, len(jobtype_info_elem)):
+        if jobtype_info_elem[i].is_displayed():
+            jobtype_info.append(jobtype_info_elem[i].text)
+    offer_jobtypes_found = []
+    for job_type in job_types_dict.values():
+        for term in job_type:
+            if term in jobtype_info or title.find(term) > -1:
+                offer_jobtypes_found.append(job_type[0])
+                break
+    return offer_jobtypes_found
+
+
+def get_company():
+    # TODO: Fix problem that location and/or company is sometimes not found, even when displayed
+    company_elements = browser.find_elements(by=By.CLASS_NAME, value="nJlQNd")
+    offer_company = ""
+    for i in range(0, len(company_elements)):
+        if company_elements[i].is_displayed():
+            offer_company = company_elements[i].text
+            break
+    return offer_company
+
+
+def get_location():
+    location_elements = browser.find_elements(by=By.CLASS_NAME, value="sMzDkb")
+    offer_location = ""
+    for i in range(0, len(location_elements)):
+        if location_elements[i].is_displayed():
+            offer_location = location_elements[i].text
+            # Cut string if additional locations are mentioned; for uniformity
+            if offer_location.find("weitere Standorte") != -1:
+                offer_location = offer_location[:offer_location.find("(") - 1]
+    return offer_location
+
+
+def get_post_date():
+    post_time_elements = browser.find_elements(by=By.CSS_SELECTOR,
+                                               value="#gws-plugins-horizon-jobs__job_details_page > div > "
+                                                     "div.ocResc > div:nth-child(1) > span.LL4CDc > span")
+    offer_post_date = str(date.today())
+    for i in range(0, len(post_time_elements)):
+        if post_time_elements[i].is_displayed():
+            post_time = post_time_elements[i].text
+            post_time = post_time.split(" ")[1]
+            try:
+                offer_post_date = str(date.today() - timedelta(days=float(post_time)))
+            except Exception as e:
+                offer_post_date = str(date.today())
+    return offer_post_date
+
+
+# returns list of names of providers of the displayed job offer
+def get_providers():
+    providers = browser.find_elements(by=By.CLASS_NAME, value="va9cAf")
+    offer_providers = []
+    for provider in providers:
+        if provider.is_displayed():
+            key = provider.text[15:]
+            # A-New-Career job website has a number in its name which would make counting difficult
+            if key.find("Live Jobs At A-New-Career") > -1:
+                key = "A-New-Career"
+            if key in offer_count.keys():
+                offer_count[key] += 1
+            else:
+                offer_count[key] = 1
+            # Store each provider of current job
+            offer_providers.append(key)
+    return offer_providers
+
+
+def show_full_description():
+    # click 'show full description' button
+    # otherwise some part of the description might be missing
+    expand_button_elements = browser.find_elements(by=By.CLASS_NAME, value="OSrXXb")
+    for button in expand_button_elements:
+        if button.is_displayed():
+            button.click()
+            break
 
 
 browser = webdriver.Firefox()
@@ -84,90 +191,24 @@ try:
             # wait for all providers of a job to load
             sleep(0.5)
 
-            title_elements = browser.find_elements(by=By.CLASS_NAME, value="KLsYvd")
-            title = ""
-            for i in range(0, len(title_elements)):
-                if title_elements[i].is_displayed():
-                    title = title_elements[i].text
-                    break
-
-            # click 'show full description' button
-            # otherwise some part of the description might be missing
-            expand_button_elements = browser.find_elements(by=By.CLASS_NAME, value="OSrXXb")
-            for button in expand_button_elements:
-                if button.is_displayed():
-                    button.click()
-                    break
-
-            description_elements = browser.find_elements(by=By.CLASS_NAME, value="HBvzbc")
-            description = ""
-            for i in range(0, len(description_elements)):
-                if description_elements[i].is_displayed():
-                    description = description_elements[i].text
-
-            jobtype_info_elem = browser.find_elements(by=By.CSS_SELECTOR,
-                                                      value="#gws-plugins-horizon-jobs__job_details_page > div > "
-                                                            "div.ocResc > div:nth-child(2) > span.LL4CDc")
-            jobtype_info = []
-            for i in range(0, len(jobtype_info_elem)):
-                if jobtype_info_elem[i].is_displayed():
-                    jobtype_info.append(jobtype_info_elem[i].text)
-            jobtypes_found = []
-            for job_type in job_types_dict.values():
-                for term in job_type:
-                    if term in jobtype_info or title.find(term) > -1:
-                        jobtypes_found.append(job_type[0])
-                        break
-
-            # TODO: Fix problem that location and/or company is sometimes not found, even when displayed
-            company_elements = browser.find_elements(by=By.CLASS_NAME, value="nJlQNd")
-            company = ""
-            for i in range(0, len(company_elements)):
-                if company_elements[i].is_displayed():
-                    company = company_elements[i].text
-                    break
-
-            location_elements = browser.find_elements(by=By.CLASS_NAME, value="sMzDkb")
-            location = ""
-            for i in range(0, len(location_elements)):
-                if location_elements[i].is_displayed():
-                    location = location_elements[i].text
-                    # Cut string if additional locations are mentioned; for uniformity
-                    if location.find("weitere Standorte") != -1:
-                        location = location[:location.find("(")-1]
-
-            post_time_elements = browser.find_elements(by=By.CSS_SELECTOR,
-                                                       value="#gws-plugins-horizon-jobs__job_details_page > div > "
-                                                             "div.ocResc > div:nth-child(1) > span.LL4CDc > span")
-            post_date = str(date.today())
-            for i in range(0, len(post_time_elements)):
-                if post_time_elements[i].is_displayed():
-                    post_time = post_time_elements[i].text
-                    post_time = post_time.split(" ")[1]
-                    try:
-                        post_date = str(date.today() - timedelta(days=float(post_time)))
-                    except Exception as e:
-                        post_date = str(date.today())
+            # Collect information about job offer
+            title = get_title()
+            show_full_description()
+            description = get_description()
+            is_synbio = is_synbio_job(title, description)
+            jobtypes_found = get_job_types()
+            company = get_company()
+            location = get_location()
+            post_date = get_post_date()
 
             # List to store providers for current job
             providers_for_offer = []
-            if not do_filtering or is_synbio_job(title, description):
+            if not do_filtering or is_synbio:
                 synbio_job_count += 1
-                providers = browser.find_elements(by=By.CLASS_NAME, value="va9cAf")
-                for provider in providers:
-                    if provider.is_displayed():
-                        key = provider.text[15:]
-                        # A-New-Career job website has a number in its name which would make counting difficult
-                        if key.find("Live Jobs At A-New-Career") > -1:
-                            key = "A-New-Career"
-                        if key in offer_count.keys():
-                            offer_count[key] += 1
-                        else:
-                            offer_count[key] = 1
-                        # Store each provider of current job
-                        providers_for_offer.append(key)
+                providers_for_offer = get_providers()
 
-            if is_synbio_job(title, description) and not is_GASB_job(providers_for_offer):
+            # Create JobOffer object and store in list
+            if is_synbio and not is_GASB_job(providers_for_offer):
                 try:
                     offer = JobOffer(title, jobtypes_found, description, browser.current_url,
                                      company, location, post_date)
@@ -220,22 +261,25 @@ if os.path.exists(job_offers_file_name):
     with open(job_offers_file_name, "rb") as job_offers_file:
         synbio_job_list_old = pickle.load(job_offers_file)
 
+
+    ### Code to print changes since last search. Does not work well because details might change. ###
+
     # Compare old and new JobOffers to find Offers that were published or removed since the last run,
     # report these changes
-    removed_offers = [item for item in synbio_job_list_old if item not in synbio_job_list]
-    new_offers = [item for item in synbio_job_list if item not in synbio_job_list_old]
-    if len(removed_offers) != 0:
-        print("\n--- REMOVED JOB OFFERS SINCE LAST SEARCH ({}) ---\n".format(len(removed_offers)))
-        for offer in removed_offers:
-            print(offer)
-    else:
-        print("\n--- No job offer was removed since last search ---\n")
-    if len(new_offers) != 0:
-        print("\n--- NEW JOB OFFERS SINCE LAST SEARCH ({}) ---\n".format(len(new_offers)))
-        for offer in new_offers:
-            print(offer)
-    else:
-        print("\n--- No job offer was added since last search ---\n")
+    # removed_offers = [item for item in synbio_job_list_old if item not in synbio_job_list]
+    # new_offers = [item for item in synbio_job_list if item not in synbio_job_list_old]
+    # if len(removed_offers) != 0:
+    #     print("\n--- REMOVED JOB OFFERS SINCE LAST SEARCH ({}) ---\n".format(len(removed_offers)))
+    #     for offer in removed_offers:
+    #         print(offer)
+    # else:
+    #     print("\n--- No job offer was removed since last search ---\n")
+    # if len(new_offers) != 0:
+    #     print("\n--- NEW JOB OFFERS SINCE LAST SEARCH ({}) ---\n".format(len(new_offers)))
+    #     for offer in new_offers:
+    #         print(offer)
+    # else:
+    #     print("\n--- No job offer was added since last search ---\n")
 
 # Save all JobOffer objects to file
 with open(job_offers_file_name, "wb") as job_offers_file:
