@@ -1,11 +1,15 @@
-import os
 import csv
+import os
 import pickle
-from time import sleep
+import requests
+import bs4
 from datetime import date, timedelta
+from time import sleep
+
 from selenium import webdriver
-from Offer_validation import JobOffer, buzzwords, job_types, job_types_dict, is_synbio_job, is_GASB_job
 from selenium.webdriver.common.by import By
+
+from Offer_validation import JobOffer, job_types_dict, is_synbio_job, is_GASB_job
 
 """
 This script is work in progress.
@@ -54,11 +58,6 @@ def uniquify(path):
         path = filename + " (" + str(counter) + ")" + extension
         counter += 1
     return path
-
-
-# checks whether a job offer is already expired
-def is_expired():
-    pass
 
 
 def get_title():
@@ -155,6 +154,26 @@ def get_providers():
     return offer_providers
 
 
+# TODO: check whether a job offer is already expired
+# TODO: When expanding of description scrolls page down, links to providers are not "displayed" anymore!
+# TODO: Currently the script crashes/ends when requests.get(url) is called...
+def is_expired():
+    provider_url_elements = browser.find_elements(by=By.CLASS_NAME, value="pMhGee")
+    job_urls = []
+    for elem in provider_url_elements:
+        if elem.is_displayed():
+            job_urls.append(elem.get_attribute("href"))
+    for url in job_urls:
+        pass
+        #page = requests.get(url)
+        # print(page.text)
+        #BS_elem = bs4.BeautifulSoup(page.text, 'html.parser')
+        #print(BS_elem.get_Text().find("has expired"))
+        # page.raise_for_status()
+        # print(page.text.find("has expired"))
+    # print("")
+
+
 def show_full_description():
     # click 'show full description' button
     # otherwise some part of the description might be missing
@@ -193,19 +212,19 @@ try:
 
             # Collect information about job offer
             title = get_title()
-            show_full_description()
-            description = get_description()
-            is_synbio = is_synbio_job(title, description)
             jobtypes_found = get_job_types()
             company = get_company()
             location = get_location()
             post_date = get_post_date()
+            providers_for_offer = get_providers()
+            is_expired()
+            # Expanding of description might cause problems with job providers when is scrolls the page down
+            show_full_description()
+            description = get_description()
+            is_synbio = is_synbio_job(title, description)
 
-            # List to store providers for current job
-            providers_for_offer = []
             if not do_filtering or is_synbio:
                 synbio_job_count += 1
-                providers_for_offer = get_providers()
 
             # Create JobOffer object and store in list
             if is_synbio and not is_GASB_job(providers_for_offer):
@@ -217,7 +236,7 @@ try:
                     print(exc)
 
         except Exception as exc:
-            print('No providers found for job offer: %s' % (exc))
+            print('ERROR:' % (exc))
 
 except Exception as exc:
     print('No matching job offers found with Google: %s' % (exc))
