@@ -15,6 +15,7 @@ job_types_dict = dict(Full_Time=["Part-time", "Part time", "part time", "part-ti
 
 
 # applies several string operations to the title of a job offer in order to make comparison easier
+# TODO: maybe Regex replacement for this method
 def comparable_title(title):
     # convert to lower case
     title1 = title.lower()
