@@ -314,9 +314,9 @@ else:
     print(str(synbio_job_count), " jobs have been found.")
 
 if do_filtering:
-    stats_file_name = uniquify("output_files/Job_site_comparison_" + date.today().strftime("%y-%m-%d") + "_synbio.csv")
+    stats_file_name = uniquify("Job_site_comparison_" + date.today().strftime("%y-%m-%d") + "_synbio.csv")
 else:
-    stats_file_name = uniquify("output_files/Job_site_comparison_" + date.today().strftime("%y-%m-%d") + "_all.csv")
+    stats_file_name = uniquify("Job_site_comparison_" + date.today().strftime("%y-%m-%d") + "_all.csv")
 
 # Read last file of saved JobOffers
 if os.path.exists(job_offers_file_name):
