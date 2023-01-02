@@ -1,3 +1,4 @@
+import os
 import csv
 import nltk
 import numpy as np
@@ -7,6 +8,10 @@ import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
 
 import_file = "export_files/export_22-11-24.csv"
+import_files = os.listdir("export_files/")
+
+
+#print(import_files)
 
 
 def calculate_similarity(column, file=import_file):
@@ -23,6 +28,8 @@ combined_similarity_array += calculate_similarity("description")
 combined_similarity_array += calculate_similarity("company")
 
 mean_similarity = combined_similarity_array/3
+
+print(mean_similarity)
 
 ax = sns.heatmap(mean_similarity, linewidth=0.5)
 ax.set_title('combined')

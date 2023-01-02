@@ -35,6 +35,7 @@ def comparable_title(title):
     title1 = title1.replace("“", "")
     title1 = title1.replace("/", "")
     title1 = title1.replace("in", "")
+    title1 = title1.replace("*", "")
     return title1
 
 
@@ -92,12 +93,6 @@ class JobOffer:
                and self.job_type == other.job_type and self.application_address_url == other.application_address_url \
                and self.location == other.location and self.post_date == other.post_date
 
-    # decide whether two offers are duplicates of each other TODO: make duplicate identification more precise
-    def is_duplicate(self, other):
-        # does the case occur, that one company offers two distinct jobs with the same title?
-        return self.description == other.description \
-               or same_title(self.title, other.title) and self.location == other.location \
-               or same_title(self.title, other.title) and same_title(self.company, other.company)
 
     # generate string for .csv file, representing object
     def csv_line(self):

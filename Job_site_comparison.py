@@ -8,6 +8,9 @@ from time import sleep
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By
+from sklearn.feature_extraction.text import TfidfVectorizer
+import seaborn as sns
+import matplotlib.pylab as plt
 
 from Offer_validation import JobOffer, job_types_dict, is_synbio_job, is_GASB_job
 
@@ -22,8 +25,6 @@ The script generates an output csv file which the number of synbio jobs found on
 
 # TODO: Automatic cookie-acceptance and scrolling, necessary to extend job search!
 
-# TODO: Optimize duplicate-detection, necessary to extend job search!
-
 # TODO: Generation of .csv file of running times/dates and number of added/removed job offers for analysis
 
 # TODO: Automated text-formatting possible?
@@ -36,6 +37,8 @@ The script generates an output csv file which the number of synbio jobs found on
 # TODO: Add Bachelor- and Master-theses offers (additional searches)
 
 # TODO: Extend search terms (e.g. biotechnology, ...-engineering, ...)
+
+# TODO: Connection to Slack channel to include jobs manually found by other active members
 
 
 # Determines whether to filter results for synbio jobs
@@ -244,14 +247,54 @@ except Exception as exc:
 
 browser.quit()
 
-# Remove duplicates
-not_duplicated = [synbio_job_list[0]]
-for i in range(1, len(synbio_job_list)):
+### Remove duplicates (code modified taken from Jonathan Funk) ###
+
+# Get data out of the objects
+titles = []
+descriptions = []
+companies = []
+
+for job in synbio_job_list:
+    titles.append(job.title)
+    descriptions.append(job.description)
+    companies.append(job.company)
+
+
+# Apply natural language processing to calculate pairwise similarities between offers
+def calculate_similarity(data_list):
+    tfidf = TfidfVectorizer().fit_transform(data_list)
+    pairwise_similarity = tfidf * tfidf.T
+    similarity_array = pairwise_similarity.toarray()
+    return similarity_array
+
+
+combined_similarity_array = calculate_similarity(titles)
+combined_similarity_array += calculate_similarity(descriptions)
+combined_similarity_array += calculate_similarity(companies)
+
+# Calculate mean similarity over three data columns
+mean_similarity = combined_similarity_array/3
+
+# Visualize similarity to check if threshold is chosen correctly
+ax = sns.heatmap(mean_similarity, linewidth=0.5)
+ax.set_title('combined')
+plt.show()
+
+# Set threshold below which two job offers are considered to be duplicates
+threshold = 0.3
+
+
+# Keep only one of each duplicated job offer
+not_duplicated = []
+# Iterate through all job offers
+for i in range(0, len(synbio_job_list)):
     duplicated = False
-    for j in range(0, len(not_duplicated)):
-        if synbio_job_list[i].is_duplicate(not_duplicated[j]):
+    # Compare each with all others further back in the list (of duplicates only the last one is kept)
+    for j in range(i + 1, len(synbio_job_list)):
+        if mean_similarity[i][j] > threshold:
             duplicated = True
             break
+    # A job offer is kept when no duplicate is found further back in the list
     if not duplicated:
         not_duplicated.append(synbio_job_list[i])
 # Report which offers where removed as duplicates for check by user
