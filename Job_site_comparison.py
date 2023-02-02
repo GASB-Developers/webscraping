@@ -23,8 +23,6 @@ in order to scrape all results. After 15 seconds the script starts scraping.
 The script generates an output csv file which the number of synbio jobs found on each web site.
 """
 
-# TODO: Automatic cookie-acceptance and scrolling, necessary to extend job search!
-
 # TODO: Generation of .csv file of running times/dates and number of added/removed job offers for analysis
 
 # TODO: Automated text-formatting possible?
@@ -39,6 +37,12 @@ The script generates an output csv file which the number of synbio jobs found on
 # TODO: Extend search terms (e.g. biotechnology, ...-engineering, ...)
 
 # TODO: Connection to Slack channel to include jobs manually found by other active members
+
+# TODO: "Quality ranking" so that in case of (not exact) duplicates the "best" offer can be kept
+
+# TODO: Optimize duplicate identification: It can happen that jobs with the same/similar description are distinct offers
+
+# TODO: Speed-up search so that the script only waits if necessary
 
 
 # Determines whether to filter results for synbio jobs
@@ -187,6 +191,18 @@ def show_full_description():
             break
 
 
+def accept_cookies():
+    cookie_button_elements = browser.find_elements(by=By.CSS_SELECTOR, value="#yDmH0d > c-wiz > div > div > div > "
+                                                                             "div.NIoIEf > div.G4njw > div.AIC7ge > "
+                                                                             "div.CxJub > div.VtwTSb > "
+                                                                             "form:nth-child(2) > div > div > button "
+                                                                             "> span")
+    for elem in cookie_button_elements:
+        if elem.is_displayed():
+            elem.click()
+            break
+
+
 browser = webdriver.Firefox()
 
 browser.get(google_jobs_url)
@@ -202,16 +218,30 @@ synbio_job_list = []
 
 
 try:
-    # Sleep time for manually accept cookies and scroll down in search results
-    sleep(15)
+    accept_cookies()
+
+    sleep(1)
     offers = browser.find_elements(by=By.CLASS_NAME, value="gws-plugins-horizon-jobs__tl-lif")
+    print(len(offers))
+    len_offers = len(offers)
+    browser.execute_script("arguments[0].scrollIntoView();", offers[len(offers)-1])
+    sleep(1)
+    offers = browser.find_elements(by=By.CLASS_NAME, value="gws-plugins-horizon-jobs__tl-lif")
+    while len_offers < len(offers):
+        print(len(offers))
+        len_offers = len(offers)
+        browser.execute_script("arguments[0].scrollIntoView();", offers[len(offers) - 1])
+        offers = browser.find_elements(by=By.CLASS_NAME, value="gws-plugins-horizon-jobs__tl-lif")
+        sleep(1)
 
     for offer in offers:
         try:
+            browser.execute_script("arguments[0].scrollIntoView();", offer)
+
             offer.click()
 
             # wait for all providers of a job to load
-            sleep(0.5)
+            sleep(0.1)
 
             # Collect information about job offer
             title = get_title()
