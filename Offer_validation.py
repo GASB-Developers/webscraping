@@ -3,7 +3,8 @@ import validators
 import textwrap as tr
 from datetime import date, timedelta
 
-buzzwords = ["synthetic biology", "synthetic biologist", "strain engineering", "protein engineering"]
+buzzwords = ["synthetic biology", "synthetic biologist", "strain engineering", "protein engineering",
+             "metabolic engineering", "biotechnology"]
 job_types = ["Part-time", "Industry", "Internship", "PhD", "PostDoc", "StartUp"]
 job_types_dict = dict(Full_Time=["Part-time", "Part time", "part time", "part-time", "Teilzeit"],
                       Industry=["Industry", "Industrie"],

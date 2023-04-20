@@ -52,10 +52,10 @@ do_filtering = True
 # url of google search results for synbio jobs
 #google_jobs_url = "https://www.google.com/search?q=job+offers+synthetic+biology&oq=job+offers+synthetic+biology&ibp=htl;jobs&sa=X"
 #google_jobs_url = "https://www.google.com/search?q=job+offers+biology&ibp=htl;jobs&sa=X&ved=2ahUKEwiW0JGKsZP-AhWMQvEDHXpTC7UQutcGKAF6BAgMEBU&sxsrf=APwXEddbgXMlJ6aGoR-ZjPLvQvh9gjn6Ig:1680719776874#htivrt=jobs&htidocid=QQr7wIYd4iUAAAAAAAAAAA%3D%3D&fpstate=tldetail"
-google_jobs_url = "https://www.google.com/search?q=job+offers+biotechnology&sxsrf=APwXEddbgXMlJ6aGoR-ZjPLvQvh9gjn6Ig:1680719776874&ei=oL8tZJaANYyFxc8P-qatqAs&uact=5&oq=job+offers+biotechnology&gs_lcp=Cgxnd3Mtd2l6LXNlcnAQAzIICAAQgAQQywEyBggAEBYQHjIGCAAQFhAeMggIABAWEB4QDzIGCAAQFhAeMggIABAWEB4QDzoKCAAQRxDWBBCwAzoECCMQJzoHCAAQgAQQEzoICAAQCBAeEA06CggAEAgQHhANEA9KBAhBGABQlApYix5g3SxoAnABeACAAVaIAeEHkgECMTOYAQCgAQHIAQjAAQE&sclient=gws-wiz-serp&ibp=htl;jobs&sa=X&ved=2ahUKEwiDitftsZP-AhU7SPEDHXZGARgQutcGKAF6BAgQEBI#htivrt=jobs&htidocid=XQki8I5s7C8AAAAAAAAAAA%3D%3D&fpstate=tldetail"
+#google_jobs_url = "https://www.google.com/search?q=job+offers+biotechnology&sxsrf=APwXEddbgXMlJ6aGoR-ZjPLvQvh9gjn6Ig:1680719776874&ei=oL8tZJaANYyFxc8P-qatqAs&uact=5&oq=job+offers+biotechnology&gs_lcp=Cgxnd3Mtd2l6LXNlcnAQAzIICAAQgAQQywEyBggAEBYQHjIGCAAQFhAeMggIABAWEB4QDzIGCAAQFhAeMggIABAWEB4QDzoKCAAQRxDWBBCwAzoECCMQJzoHCAAQgAQQEzoICAAQCBAeEA06CggAEAgQHhANEA9KBAhBGABQlApYix5g3SxoAnABeACAAVaIAeEHkgECMTOYAQCgAQHIAQjAAQE&sclient=gws-wiz-serp&ibp=htl;jobs&sa=X&ved=2ahUKEwiDitftsZP-AhU7SPEDHXZGARgQutcGKAF6BAgQEBI#htivrt=jobs&htidocid=XQki8I5s7C8AAAAAAAAAAA%3D%3D&fpstate=tldetail"
 #google_jobs_url = ""
 
-
+google_jobs_url = "https://www.google.com/search?q=synthetic+biology+job+offers&sxsrf=APwXEde-lygOz7othEIDZQdJAq1U6lhppA:1682009949210&ei=XW9BZMevDJeHxc8PpOWsmAE&oq=synth&gs_lcp=Cgxnd3Mtd2l6LXNlcnAQAxgAMgQIIxAnMgoIABCKBRCxAxBDMggIABCABBCxAzIICAAQgAQQsQMyCAgAEIAEELEDMggIABCABBCxAzIICAAQgAQQsQMyCAgAEIAEELEDMggIABCABBCxAzIICAAQgAQQsQM6CggAEEcQ1gQQsAM6BwgAEIoFEEM6BQgAEIAEOgsIABCABBCxAxCDAToLCC4QgAQQsQMQgwE6FAguEIAEELEDEIMBEMcBENEDENQCOhEILhCABBCxAxCDARDHARDRAzoICC4QgAQQsQM6DgguEIAEELEDEMcBENEDSgQIQRgAUIMVWJQcYLIsaARwAXgAgAFmiAGYA5IBAzQuMZgBAKABAcgBCMABAQ&sclient=gws-wiz-serp&ibp=htl;jobs&sa=X&ved=2ahUKEwiNmIO297j-AhXEQvEDHbJUD9IQutcGKAF6BAg_EBU#htivrt=jobs&htidocid=DXEjpnrYNgYAAAAAAAAAAA%3D%3D&fpstate=tldetail"
 
 # Name of output file to store JobOffer objects
 job_offers_file_name = "Job_offers_last_run.list"
@@ -235,9 +235,11 @@ try:
         print(len(offers))
         len_offers = len(offers)
         browser.execute_script("arguments[0].scrollIntoView();", offers[len(offers) - 1])
+        sleep(5)
         offers = browser.find_elements(by=By.CLASS_NAME, value="gws-plugins-horizon-jobs__tl-lif")
-        sleep(1)
 
+
+    print(str(len(offers)) + " overall job offers have been found.")
     for offer in offers:
         try:
             browser.execute_script("arguments[0].scrollIntoView();", offer)
