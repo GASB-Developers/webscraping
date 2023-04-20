@@ -50,7 +50,11 @@ do_filtering = True
 
 
 # url of google search results for synbio jobs
-google_jobs_url = "https://www.google.com/search?q=job+offers+synthetic+biology&oq=job+offers+synthetic+biology&ibp=htl;jobs&sa=X"
+#google_jobs_url = "https://www.google.com/search?q=job+offers+synthetic+biology&oq=job+offers+synthetic+biology&ibp=htl;jobs&sa=X"
+#google_jobs_url = "https://www.google.com/search?q=job+offers+biology&ibp=htl;jobs&sa=X&ved=2ahUKEwiW0JGKsZP-AhWMQvEDHXpTC7UQutcGKAF6BAgMEBU&sxsrf=APwXEddbgXMlJ6aGoR-ZjPLvQvh9gjn6Ig:1680719776874#htivrt=jobs&htidocid=QQr7wIYd4iUAAAAAAAAAAA%3D%3D&fpstate=tldetail"
+google_jobs_url = "https://www.google.com/search?q=job+offers+biotechnology&sxsrf=APwXEddbgXMlJ6aGoR-ZjPLvQvh9gjn6Ig:1680719776874&ei=oL8tZJaANYyFxc8P-qatqAs&uact=5&oq=job+offers+biotechnology&gs_lcp=Cgxnd3Mtd2l6LXNlcnAQAzIICAAQgAQQywEyBggAEBYQHjIGCAAQFhAeMggIABAWEB4QDzIGCAAQFhAeMggIABAWEB4QDzoKCAAQRxDWBBCwAzoECCMQJzoHCAAQgAQQEzoICAAQCBAeEA06CggAEAgQHhANEA9KBAhBGABQlApYix5g3SxoAnABeACAAVaIAeEHkgECMTOYAQCgAQHIAQjAAQE&sclient=gws-wiz-serp&ibp=htl;jobs&sa=X&ved=2ahUKEwiDitftsZP-AhU7SPEDHXZGARgQutcGKAF6BAgQEBI#htivrt=jobs&htidocid=XQki8I5s7C8AAAAAAAAAAA%3D%3D&fpstate=tldetail"
+#google_jobs_url = ""
+
 
 
 # Name of output file to store JobOffer objects
