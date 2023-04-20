@@ -316,8 +316,8 @@ ax = sns.heatmap(mean_similarity, linewidth=0.5)
 ax.set_title('combined')
 plt.show()
 
-# Set threshold below which two job offers are considered to be duplicates
-threshold = 0.3
+# Set threshold above which two job offers are considered to be duplicates
+threshold = 0.4
 
 
 # Keep only one of each duplicated job offer
